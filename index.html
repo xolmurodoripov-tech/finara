@@ -937,6 +937,25 @@
   </div>
 </section>
 
+<section id="qualifications">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow" data-i18n="qual.eyebrow">MALAKALAR</div>
+      <h2 data-i18n="qual.title">Xalqaro standartlar bo'yicha o'sib boruvchi bilim</h2>
+      <p data-i18n="qual.sub">Jamoamiz nafaqat mahalliy, balki xalqaro moliyaviy hisobot standartlarini ham chuqur o'rganmoqda.</p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="team-card-body">
+          <h4>Hayoxon Toshtemirova</h4>
+          <div class="team-role" data-i18n="qual.p1.role">ACCA dasturi ishtirokchisi</div>
+          <p data-i18n="qual.p1.desc">ACCA (Chartered Certified Accountants uyushmasi) dasturi doirasida ta'lim olmoqda — Financial Reporting (moliyaviy hisobot) fani bo'yicha imtihonni muvaffaqiyatli topshirgan. Dastur davom etmoqda.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="services">
   <div class="container">
     <div class="section-head reveal">
@@ -1816,13 +1835,14 @@ if(window.matchMedia('(min-width:901px)').matches){
 }
 
 // Telegram auto-notification for visitor interest (silent background ping to the business owner)
-const TELEGRAM_BOT_TOKEN = '8824452455:AAEYREUOn45EECu8RihZGOBHU4ZZxAjYDwk';
-const TELEGRAM_CHAT_ID = '1417175918';
+// SECURITY: bot token endi shu yerda YO'Q. Xabar backend (masalan /api/notify) orqali yuboriladi,
+// token esa serverda environment variable sifatida saqlanadi. Pastdagi notify-server/ papkasiga qarang.
+const NOTIFY_ENDPOINT = '/api/notify';
 function notifyOwner(text){
-  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+  fetch(NOTIFY_ENDPOINT, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: text })
+    body: JSON.stringify({ text: text })
   }).catch(()=>{});
 }
 
@@ -1850,7 +1870,24 @@ if(leadForm){
     const phone = document.getElementById('leadPhone').value.trim();
     const service = document.getElementById('leadService').value.trim();
     const message = document.getElementById('leadMessage').value.trim();
-    if(!name || !phone) return;
+
+    // Validatsiya: ism kamida 2 ta harf, faqat harf/probel/tire bo'lishi kerak
+    const nameOk = name.length >= 2 && /^[A-Za-zА-Яа-яЎўҚқҒғҲҳ\s'-]+$/.test(name);
+    // Validatsiya: O'zbekiston telefon raqami (+998 bilan yoki uni bilan, 9 ta raqam)
+    const phoneDigits = phone.replace(/[^\d]/g, '');
+    const phoneOk = /^(998)?\d{9}$/.test(phoneDigits);
+
+    if(!nameOk){
+      alert("Iltimos, ismingizni to'g'ri kiriting (kamida 2 ta harf).");
+      document.getElementById('leadName').focus();
+      return;
+    }
+    if(!phoneOk){
+      alert("Iltimos, telefon raqamini to'g'ri formatda kiriting. Masalan: +998 90 123 45 67");
+      document.getElementById('leadPhone').focus();
+      return;
+    }
+
     const lines = [
       `Assalomu alaykum! Men FINARA saytidagi forma orqali murojaat qilyapman.`,
       `Ism: ${name}`,
@@ -1870,7 +1907,12 @@ if(newsletterForm){
   newsletterForm.addEventListener('submit', function(e){
     e.preventDefault();
     const email = document.getElementById('newsletterEmail').value.trim();
-    if(!email) return;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    if(!emailOk){
+      alert("Iltimos, to'g'ri email manzil kiriting (masalan: ism@mail.com).");
+      document.getElementById('newsletterEmail').focus();
+      return;
+    }
     const subject = encodeURIComponent('Yangiliklarga obuna');
     const body = encodeURIComponent(`Salom! Iltimos, meni yangiliklar ro'yxatiga qo'shing.\nEmail: ${email}`);
     window.location.href = `mailto:xolmurod.oripov@mail.ru?subject=${subject}&body=${body}`;
