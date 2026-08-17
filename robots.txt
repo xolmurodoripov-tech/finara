@@ -1,0 +1,9 @@
+# FINARA — https://finara.uz
+User-agent: *
+Allow: /
+
+# Vercel'ning texnik nusxasi indekslanmasin (dublikat kontentning oldini oladi)
+User-agent: *
+Disallow: /api/
+
+Sitemap: https://finara.uz/sitemap.xml
