@@ -541,9 +541,10 @@
     overflow:hidden; box-shadow:var(--shadow-xs); transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
   }
   .team-card:hover{transform:translateY(-6px); box-shadow:var(--shadow-lg);}
-  .team-card .team-photo{width:100%; height:260px; object-fit:cover; display:block; background:var(--surface-2);}
+  .team-card .team-photo{width:100%; height:300px; object-fit:cover; object-position:center 24%; display:block; background:var(--surface-2);}
+  .team-card:first-child .team-photo{height:300px; object-position:center 20%; transform:scale(1.08); transform-origin:center 20%;}
   .team-card .team-avatar{
-    width:100%; height:260px; display:flex; align-items:center; justify-content:center;
+    width:100%; height:300px; display:flex; align-items:center; justify-content:center;
     background:var(--gradient-brand); font-family:'Fraunces',serif; font-size:3rem; font-weight:700; color:var(--white);
   }
   .team-card-body{padding:var(--space-5);}
@@ -555,7 +556,7 @@
   .cert-window h3{font-family:'Fraunces',serif; font-size:1.2rem; margin-bottom:20px; text-align:center;}
   .cert-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:18px;}
   .cert-slot{display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;}
-  .cert-slot img{width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); box-shadow:0 6px 18px -6px rgba(0,0,0,0.15); transition:transform .25s ease, box-shadow .25s ease; cursor:zoom-in;}
+  .cert-slot img{width:100%; height:240px; aspect-ratio:auto; object-fit:contain; background:#fff; padding:8px; border-radius:var(--radius-sm); border:1px solid var(--border-subtle); box-shadow:0 6px 18px -6px rgba(0,0,0,0.15); transition:transform .25s ease, box-shadow .25s ease; cursor:zoom-in;}
   .cert-slot img:hover{transform:translateY(-4px) scale(1.02); box-shadow:0 12px 26px -8px rgba(0,0,0,0.22);}
   .cert-slot span{font-size:0.8rem; color:var(--ink-soft);}
   .cert-lightbox{display:none; position:fixed; inset:0; z-index:9999; background:rgba(10,20,16,0.88); align-items:center; justify-content:center; padding:40px 20px; cursor:zoom-out;}
@@ -563,7 +564,7 @@
   .cert-lightbox img{max-width:min(90vw,720px); max-height:88vh; width:auto; height:auto; border-radius:var(--radius-sm); box-shadow:0 20px 60px -12px rgba(0,0,0,0.5); cursor:default;}
   .cert-lightbox-close{position:absolute; top:20px; right:28px; background:none; border:none; color:#fff; font-size:2.4rem; line-height:1; cursor:pointer; padding:6px 10px;}
   .cert-lightbox-close:hover{opacity:0.8;}
-  @media (max-width:720px){ .cert-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:720px){ .cert-grid{grid-template-columns:repeat(2,1fr);} .cert-slot img{height:180px;} .team-card .team-photo,.team-card .team-avatar,.team-card:first-child .team-photo{height:280px;} .team-card:first-child .team-photo{transform:scale(1.04);} }
   .team-cert-badge svg{width:12px; height:12px; stroke:var(--green-dark); flex-shrink:0;}
 
   /* ===== CLIENT LOGOS STRIP ===== */
@@ -1260,7 +1261,7 @@ select:focus-visible, textarea:focus-visible, [role="button"]:focus-visible{
       <div class="why-card reveal">
         <div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
         <div class="why-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-        <h3 data-i18n="w2.t">Tezkorlik</h3><p data-i18n="w2.d">So'rovlaringizga 24-48 soat ichida javob beramiz, shoshilinch holatlarda tezroq.</p>
+        <h3 data-i18n="w2.t">Tezkorlik</h3><p data-i18n="w2.d">So'rovlaringizga 24/7 aloqada bo'lamiz, shoshilinch holatlarda tezroq.</p>
       </div>
       <div class="why-card reveal">
         <div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
@@ -1577,7 +1578,7 @@ const translations = {
     "calc.legend.base":"Baza","calc.legend.emp":"Xodimlar","calc.legend.doc":"Hujjatlar","calc.legend.tx":"Tranzaksiya","calc.legend.extra":"Qo'shimcha",
     "why.eyebrow":"NEGA AYNAN FINARA","why.title":"Har bir raqamning ortida mas'uliyat turadi","why.sub":"Hisobingizni tasodifiy odamga emas — BAIM sertifikatlangan auditor rahbarligidagi, ACCA (Buyuk Britaniya) dasturi nomzodini o'z ichiga olgan jamoaga topshirasiz.",
     "w1.t":"Shaffoflik","w1.d":"Har bir operatsiya va to'lov hisobotda aniq ko'rsatiladi — yashirin to'lovlar yo'q.",
-    "w2.t":"Tezkorlik","w2.d":"So'rovlaringizga 24-48 soat ichida javob beramiz, shoshilinch holatlarda tezroq.",
+    "w2.t":"Tezkorlik","w2.d":"So'rovlaringiz bilan 24/7 aloqada bo'lamiz, shoshilinch holatlarda tezroq.",
     "w3.t":"Maxfiylik","w3.d":"Moliyaviy ma'lumotlaringiz shartnoma asosida to'liq maxfiy saqlanadi.",
     "w4.t":"Tekshiruvlarda qo'llab-quvvatlash","w4.d":"Soliq va boshqa tekshiruvlar vaqtida sizning yoningizda bo'lamiz.",
     "w5.t":"Zamonaviy dasturlar","w5.d":"Buxgalteriya avtomatlashtirilgan tizimlar orqali xatoliklarni minimallashtiramiz.",
@@ -1644,7 +1645,7 @@ const translations = {
     "calc.legend.base":"База","calc.legend.emp":"Сотрудники","calc.legend.doc":"Документы","calc.legend.tx":"Транзакции","calc.legend.extra":"Доп. услуги",
     "why.eyebrow":"ПОЧЕМУ ИМЕННО FINARA","why.title":"За каждой цифрой стоит ответственность","why.sub":"Вашу отчётность ведёт не случайный человек — команду возглавляет аудитор с сертификатом BAIM, а в её составе есть кандидат международной программы ACCA (Великобритания).",
     "w1.t":"Прозрачность","w1.d":"Каждая операция и платёж чётко отражены в отчёте — никаких скрытых платежей.",
-    "w2.t":"Скорость","w2.d":"Отвечаем на ваши запросы в течение 24-48 часов, в срочных случаях быстрее.",
+    "w2.t":"Скорость","w2.d":"Мы на связи 24/7, а на срочные запросы отвечаем ещё быстрее.",
     "w3.t":"Конфиденциальность","w3.d":"Ваши финансовые данные полностью защищены условиями договора.",
     "w4.t":"Поддержка при проверках","w4.d":"Мы рядом с вами во время налоговых и других проверок.",
     "w5.t":"Современные программы","w5.d":"Минимизируем ошибки за счёт автоматизированных систем учёта.",
@@ -1711,7 +1712,7 @@ const translations = {
     "calc.legend.base":"Base","calc.legend.emp":"Staff","calc.legend.doc":"Documents","calc.legend.tx":"Transactions","calc.legend.extra":"Add-ons",
     "why.eyebrow":"WHY FINARA","why.title":"Behind every number stands accountability","why.sub":"Your books aren't handled by just anyone — the team is led by a BAIM-certified auditor and includes a candidate of the international ACCA (UK) qualification.",
     "w1.t":"Transparency","w1.d":"Every transaction and payment is clearly shown in the report — no hidden fees.",
-    "w2.t":"Speed","w2.d":"We respond to your requests within 24-48 hours, faster for urgent matters.",
+    "w2.t":"Speed","w2.d":"We are available 24/7 and respond even faster to urgent requests.",
     "w3.t":"Confidentiality","w3.d":"Your financial data is fully protected under contractual terms.",
     "w4.t":"Audit support","w4.d":"We stand by you during tax and other regulatory inspections.",
     "w5.t":"Modern software","w5.d":"We minimize errors through automated accounting systems.",
