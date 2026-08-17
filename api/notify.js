@@ -1,55 +1,100 @@
-// api/notify.js
-// Vercel serverless function. Bu fayl "notify-server" papkasi ildizida joylashtiriladi.
+// ══════════════════════════════════════════════════════════════════════
+//  FINARA — /api/notify   (Vercel Serverless Function)
+//  Fayl joyi:  loyiha_ildizi/api/notify.js
 //
-// NEGA KERAK:
-// Avvalgi kodda Telegram bot tokeni brauzer tomonidagi (client-side) JavaScript ichida
-// ochiq turardi. Har qanday tashrifchi "View Source" orqali tokenni ko'rib, botdan
-// o'zi foydalanishi (spam yuborish, chatni to'ldirish va h.k.) mumkin edi.
+//  Sayt kodi shu manzilga POST qiladi. AGAR BU FAYL BO'LMASA, har bir
+//  so'rov 404 bilan qaytadi va sayt uni JIMGINA yutib yuboradi
+//  (fetch(...).catch(()=>{})) — ya'ni siz lead kelmayotganini ham
+//  bilmay qolasiz. Shuning uchun bu fayl majburiy.
 //
-// Bu yechimda token faqat SERVERDA, environment variable sifatida saqlanadi va
-// hech qachon brauzerga yuborilmaydi.
+//  Vercel'da sozlash (Settings → Environment Variables):
+//     TELEGRAM_BOT_TOKEN = 1234567890:AA...        (BotFather bergan token)
+//     TELEGRAM_CHAT_ID   = 123456789               (@userinfobot beradi)
+//  Token HECH QACHON HTML ichida bo'lmasligi kerak — u brauzerda ochiq
+//  ko'rinadi va istalgan odam sizning botingizdan foydalana oladi.
+// ══════════════════════════════════════════════════════════════════════
+
+// Oddiy spam himoyasi: bitta IP dan daqiqasiga 5 tadan ko'p bo'lmasin.
+const hits = new Map();
+const WINDOW_MS = 60_000;
+const MAX_PER_WINDOW = 5;
+
+function rateLimited(ip) {
+  const now = Date.now();
+  const rec = hits.get(ip) || { count: 0, start: now };
+  if (now - rec.start > WINDOW_MS) {
+    rec.count = 0;
+    rec.start = now;
+  }
+  rec.count += 1;
+  hits.set(ip, rec);
+  if (hits.size > 5000) hits.clear();          // xotira o'smasin
+  return rec.count > MAX_PER_WINDOW;
+}
 
 export default async function handler(req, res) {
-  // Faqat POST so'rovlarga ruxsat
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  // Faqat o'z saytimizdan
+  const origin = req.headers.origin || '';
+  const allowed = ['https://finara.uz', 'https://www.finara.uz'];
+  if (allowed.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const ip =
+    (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  if (rateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests' });
   }
 
+  const token  = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) {
+    console.error('notify: TELEGRAM_BOT_TOKEN yoki TELEGRAM_CHAT_ID sozlanmagan');
+    return res.status(500).json({ error: 'Server not configured' });
+  }
+
+  let text = '';
   try {
-    const { text } = req.body || {};
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    text = String((body && body.text) || '').slice(0, 3000);   // uzunlik chegarasi
+  } catch {
+    return res.status(400).json({ error: 'Bad JSON' });
+  }
+  if (!text.trim()) return res.status(400).json({ error: 'Empty text' });
 
-    // Oddiy validatsiya: bo'sh yoki juda uzun xabarlarni rad etamiz
-    if (!text || typeof text !== 'string' || text.trim().length === 0) {
-      return res.status(400).json({ ok: false, error: 'Text is required' });
-    }
-    if (text.length > 2000) {
-      return res.status(400).json({ ok: false, error: 'Text too long' });
-    }
+  // Telegram HTML-parse rejimi uchun xavfli belgilarni tozalaymiz
+  const safe = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
-    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-    const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+  const stamp = new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Tashkent' });
+  const message = `${safe}\n\n<i>${stamp} · ${ip}</i>`;
 
-    if (!BOT_TOKEN || !CHAT_ID) {
-      console.error('TELEGRAM_BOT_TOKEN yoki TELEGRAM_CHAT_ID environment variable topilmadi');
-      return res.status(500).json({ ok: false, error: 'Server not configured' });
-    }
-
-    const tgResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+  try {
+    const tg = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text }),
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      }),
     });
-
-    if (!tgResponse.ok) {
-      const errBody = await tgResponse.text();
-      console.error('Telegram API xatosi:', errBody);
-      return res.status(502).json({ ok: false, error: 'Telegram notify failed' });
+    if (!tg.ok) {
+      const detail = await tg.text();
+      console.error('notify: Telegram xatosi', tg.status, detail);
+      return res.status(502).json({ error: 'Telegram error' });
     }
-
     return res.status(200).json({ ok: true });
-  } catch (err) {
-    console.error('notify.js xatosi:', err);
-    return res.status(500).json({ ok: false, error: 'Internal error' });
+  } catch (e) {
+    console.error('notify:', e);
+    return res.status(500).json({ error: 'Send failed' });
   }
 }
