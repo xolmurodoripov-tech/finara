@@ -620,6 +620,8 @@
   /* ===== SCROLL REVEAL & MOTION ===== */
   .reveal{opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1);}
   .reveal.in-view{opacity:1; transform:translateY(0);}
+  /* Jamoa va sertifikatlar bo‘limi asosiy ishonch bloklari: animatsiya kechiksa ham mazmun yashirin qolmasin. */
+  #team .team-card, #team .cert-window{opacity:1; transform:none;}
   .ledger-card{animation:floatCard 5s ease-in-out infinite;}
   @keyframes floatCard{0%,100%{transform:rotate(1.2deg) translateY(0);} 50%{transform:rotate(1.2deg) translateY(-10px);}}
   .btn:hover{transform:translateY(-2px);}
